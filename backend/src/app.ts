@@ -60,7 +60,16 @@ export function createApp(options: AppOptions = {}) {
   const app = express();
   const origins = (env.FRONTEND_ORIGIN || "http://localhost:3000,http://localhost:3001").split(",").map(o => o.trim()).filter(Boolean);
   app.disable("x-powered-by");
-  app.use(cors({ origin: origins }));
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || origins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  }));
 
   // Raw upload endpoint for demo storage (must come before the JSON parser).
   app.put("/api/files/upload/:token", express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), (req, res) => {

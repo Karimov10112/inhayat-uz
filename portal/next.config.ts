@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
   poweredByHeader: false,
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${process.env.BACKEND_INTERNAL_URL || "http://localhost:4000"}/api/:path*` }];
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    return [{ source: "/api/:path*", destination: `${backendUrl}/api/:path*` }];
   },
   async headers() {
     return [{ source: "/:path*", headers: [
