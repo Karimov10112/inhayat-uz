@@ -1,0 +1,20 @@
+{
+  "name": "lifebridge-uz",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm install && npm install --prefix frontend && npm install --prefix portal && npm install --prefix backend",
+    "dev": "concurrently -n backend,bemor,portal -c yellow,green,cyan \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:portal\"",
+    "dev:all": "npm run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:portal": "npm --prefix portal run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "demo:reset": "node -e \"require('fs').rmSync('backend/.demo-data',{recursive:true,force:true});console.log('Demo ma\\u2019lumotlar o\\u2018chirildi. Backend qayta ishga tushganda yangidan yaratiladi.')\"",
+    "build": "npm --prefix frontend run build && npm --prefix portal run build && npm --prefix backend run build",
+    "start": "npm --prefix frontend run start",
+    "test": "node --test frontend/tests/auth-flow.test.mjs frontend/tests/auth-redirect.test.mjs frontend/tests/uploads-and-maps.test.mjs && npm --prefix backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

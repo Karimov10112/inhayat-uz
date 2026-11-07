@@ -1,0 +1,11 @@
+node_modules
+.next
+.vercel
+.env
+.env*.local
+npm-debug.log*
+npm-install*.log
+
+# Demo data written by the backend
+backend/.demo-data/
+.demo-data/
