@@ -97,7 +97,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     name: "system_health",
-    description: "Texnik holat: ma’lumotlar rejimi (demo/supabase), fayl ombori (local/r2), AI provayder, ishlash vaqti, xotira.",
+    description: "Texnik holat: lokal demo ma’lumotlari, fayl ombori, offline agent, ishlash vaqti va xotira.",
     input_schema: { type: "object", properties: {} },
     run: async ctx => ({
       data_mode: ctx.system.mode, file_storage: ctx.system.storage, ai_provider: ctx.system.aiProvider,

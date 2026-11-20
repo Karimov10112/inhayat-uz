@@ -126,18 +126,18 @@ export function LifeBridgePage() {
       <nav className="nav">
         <a className="brand" href="#top">
           <span className="brand-mark"><HeartPulse size={20}/></span>
-          <span>Life<span>Bridge</span></span>
+          <span>In<span>Hayat</span></span>
         </a>
-        <div className={menuOpen ? "navlinks open" : "navlinks"}>
-          <button onClick={() => openSection("how")}>{strings.nav_how}</button>
-          <button onClick={() => openSection("centres")}>{strings.nav_centres}</button>
-          <button onClick={() => openSection("budget")}>{strings.nav_budget}</button>
-          <button onClick={() => openSection("faq")}>{strings.nav_help}</button>
+        <div className={menuOpen ? "navlinks open" : "navlinks"} data-active={activeSection}>
+          <span className="nav-drop" aria-hidden="true"/>
+          {([["how", strings.nav_how], ["centres", strings.nav_centres], ["budget", strings.nav_budget], ["faq", strings.nav_help]] as const).map(([id, label]) => (
+            <button key={id} aria-current={activeSection === id ? "location" : undefined} onClick={() => openSection(id)}>{label}</button>
+          ))}
         </div>
         <div className="nav-actions">
           <SitePreferencesControls />
           <a className="outline-button" href="/cabinet">{strings.nav_login}</a>
-          <button className="menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menyu">
+          <button className="menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menyu" aria-expanded={menuOpen}>
             {menuOpen ? <X/> : <Menu/>}
           </button>
         </div>
@@ -150,9 +150,9 @@ export function LifeBridgePage() {
           <div className="eyebrow"><Sparkles size={14}/> {strings.hero_all_in_one}</div>
           <h1>{strings.hero_title_1}<em>{strings.hero_title_em}</em>{strings.hero_title_2}</h1>
           <p>{strings.hero_desc}</p>
-          <div className="trust-row">
-            <div className="avatars"><i>O</i><i>S</i><i>M</i></div>
-            <span>{strings.hero_not_alone}</span>
+          <div className="hero-actions">
+            <a className="hero-primary" href="/cabinet">{strings.nav_login}</a>
+            <button type="button" onClick={() => openSection("clinics")}><MapPin size={17}/>{strings.nav_clinics}</button>
           </div>
         </div>
         <div className="hero-visual doctor-hero">
@@ -295,77 +295,25 @@ export function LifeBridgePage() {
                 {regions.map(r => <option key={r}>{r}</option>)}
               </select>
             </label>
-            <div style={{ marginTop: "12px", marginBottom: "16px" }}>
-              <span style={{ fontSize: "13px", fontWeight: "500", color: "var(--foreground, #1e293b)", display: "block", marginBottom: "8px" }}>
-                {strings.budget_transport_type || "Transport turi"}
-              </span>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
-                <button
-                  type="button"
-                  onClick={() => setTransportType("train")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    padding: "10px 6px",
-                    borderRadius: "10px",
-                    border: transportType === "train" ? "2px solid #0f766e" : "1px solid #cbd5e1",
-                    backgroundColor: transportType === "train" ? "#e6f4f2" : "#ffffff",
-                    color: transportType === "train" ? "#0f766e" : "#475569",
-                    fontWeight: transportType === "train" ? "600" : "500",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    transition: "all 0.15s ease"
-                  }}
-                >
-                  <TrainFront size={16} />
-                  <span>{strings.budget_train || "Poyezd"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTransportType("plane")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    padding: "10px 6px",
-                    borderRadius: "10px",
-                    border: transportType === "plane" ? "2px solid #0f766e" : "1px solid #cbd5e1",
-                    backgroundColor: transportType === "plane" ? "#e6f4f2" : "#ffffff",
-                    color: transportType === "plane" ? "#0f766e" : "#475569",
-                    fontWeight: transportType === "plane" ? "600" : "500",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    transition: "all 0.15s ease"
-                  }}
-                >
-                  <Plane size={16} />
-                  <span>{strings.budget_plane || "Samolyot"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTransportType("bus")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    padding: "10px 6px",
-                    borderRadius: "10px",
-                    border: transportType === "bus" ? "2px solid #0f766e" : "1px solid #cbd5e1",
-                    backgroundColor: transportType === "bus" ? "#e6f4f2" : "#ffffff",
-                    color: transportType === "bus" ? "#0f766e" : "#475569",
-                    fontWeight: transportType === "bus" ? "600" : "500",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    transition: "all 0.15s ease"
-                  }}
-                >
-                  <Bus size={16} />
-                  <span>{strings.budget_bus || "Avtobus"}</span>
-                </button>
+            <div className="transport-picker" role="radiogroup" aria-label={strings.budget_transport_type || "Transport turi"}>
+              <span>{strings.budget_transport_type || "Transport turi"}</span>
+              <div>
+                {([
+                  ["train", TrainFront, strings.budget_train || "Poyezd"],
+                  ["plane", Plane, strings.budget_plane || "Samolyot"],
+                  ["bus", Bus, strings.budget_bus || "Avtobus"],
+                ] as const).map(([id, Icon, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="radio"
+                    aria-checked={transportType === id}
+                    className={transportType === id ? "active" : ""}
+                    onClick={() => setTransportType(id)}
+                  >
+                    <Icon size={16}/> <span>{label}</span>
+                  </button>
+                ))}
               </div>
             </div>
             <label>
@@ -397,7 +345,7 @@ export function LifeBridgePage() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `lifebridge-travel-plan-${locale}.json`;
+                a.download = `inhayat-travel-plan-${locale}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
               }}
@@ -499,10 +447,10 @@ export function LifeBridgePage() {
       <footer>
         <a className="brand" href="#top">
           <span className="brand-mark"><HeartPulse size={20}/></span>
-          <span>Life<span>Bridge</span></span>
+          <span>In<span>Hayat</span></span>
         </a>
         <p>{strings.footer_tagline}</p>
-        <small>© {new Date().getFullYear()} LifeBridge. {strings.footer_disclaimer}</small>
+        <small>© {new Date().getFullYear()} InHayat. {strings.footer_disclaimer}</small>
       </footer>
     </main>
   );

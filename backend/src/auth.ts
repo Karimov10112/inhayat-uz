@@ -27,7 +27,9 @@ export function issueToken(data: Record<string, unknown>, ttlSeconds: number): s
 }
 
 export function readToken<T extends Record<string, unknown>>(token: string): T | null {
-  const [body, signature] = token.split(".");
+  if (token.length > 4096) return null;
+  const [body, signature, extra] = token.split(".");
+  if (extra !== undefined) return null;
   if (!body || !signature) return null;
   const expected = Buffer.from(sign(body));
   const given = Buffer.from(signature);

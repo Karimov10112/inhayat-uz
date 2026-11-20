@@ -9,3 +9,7 @@ npm-install*.log
 # Demo data written by the backend
 backend/.demo-data/
 .demo-data/
+.demo-data-mem/
+backend/dist/
+*.tsbuildinfo
+supabase/.temp/

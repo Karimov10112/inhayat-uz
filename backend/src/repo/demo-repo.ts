@@ -10,6 +10,7 @@ import {
 } from "../types.js";
 import type { Repo } from "./repo.js";
 import { seedDemoData } from "./demo-seed.js";
+import type { DataCipher } from "../encryption.js";
 
 export interface DemoUser { id: string; email: string; phone: string; password_hash: string; is_admin: boolean; created_at: string }
 
@@ -36,24 +37,33 @@ const now = () => new Date().toISOString();
 
 /**
  * Demo data store: a single JSON file. Access rules mirror the Supabase RLS
- * policies in backend/supabase/004_provider_portal.sql.
+ * policies expected by the local demo portal.
  */
 export class DemoRepo implements Repo {
   private db: DemoDb;
   private saveTimer: NodeJS.Timeout | null = null;
 
   /** @param writeSeedFile stores the sample documents created by the seed */
-  constructor(private file: string | null, private writeSeedFile: (key: string, content: Buffer) => void = () => {}) {
+  constructor(private file: string | null, private writeSeedFile: (key: string, content: Buffer) => void = () => {}, private cipher: DataCipher = null, private seed = true) {
     if (file && existsSync(file)) {
-      this.db = JSON.parse(readFileSync(file, "utf8")) as DemoDb;
+      const stored = readFileSync(file);
+      this.db = JSON.parse((cipher ? cipher.open(stored, "inhayat-db-v1") : stored).toString("utf8")) as DemoDb;
     } else {
       this.db = emptyDb();
-      seedDemoData(this.db).forEach(f => this.writeSeedFile(f.key, f.content));
+      if (seed) seedDemoData(this.db).forEach(f => this.writeSeedFile(f.key, f.content));
       this.persist(true);
     }
   }
 
+  bootstrapAdmin(email: string, password: string) {
+    if (this.db.users.some(user => user.is_admin)) return;
+    if (this.findUserByLogin({ email })) throw new Error("Bootstrap email already exists.");
+    this.register({ email }, password).is_admin = true;
+    this.flush();
+  }
+
   reset() {
+    if (!this.seed) throw new HttpError(404, "Faqat demo rejimda.");
     this.db = emptyDb();
     seedDemoData(this.db).forEach(f => this.writeSeedFile(f.key, f.content));
     this.persist(true);
@@ -65,7 +75,8 @@ export class DemoRepo implements Repo {
     const write = () => {
       this.saveTimer = null;
       mkdirSync(dirname(this.file!), { recursive: true });
-      writeFileSync(`${this.file}.tmp`, JSON.stringify(this.db, null, 1));
+      const data = Buffer.from(JSON.stringify(this.db));
+      writeFileSync(`${this.file}.tmp`, this.cipher ? this.cipher.seal(data, "inhayat-db-v1") : data, { mode: 0o600 });
       renameSync(`${this.file}.tmp`, this.file!);
     };
     if (immediate) { if (this.saveTimer) clearTimeout(this.saveTimer); write(); return; }
@@ -112,6 +123,9 @@ export class DemoRepo implements Repo {
   }
   private staffCanAccess(actor: Actor, caseId: string) {
     return !!this.approvedStaff(actor.id) && this.db.shares.some(s => s.case_id === caseId && s.staff_id === actor.id && s.active);
+  }
+  canAccessCase(actor: Actor, caseId: string) {
+    return !!this.ownCase(actor, caseId) || this.staffCanAccess(actor, caseId);
   }
   private requireAdmin(actor: Actor) { if (!actor.isAdmin) throw new HttpError(403, "Faqat administrator uchun."); }
   private directoryEntry(s: StaffProfile): DirectoryEntry {
@@ -175,16 +189,23 @@ export class DemoRepo implements Repo {
   async addDocument(actor: Actor, input: { caseId: string; kind: DocKind; objectKey: string; originalName: string; mimeType: string; bytes: number }) {
     const row = this.ownCase(actor, input.caseId);
     if (!row) throw new HttpError(404, "Yo‘l xaritasi topilmadi.");
+    if (this.db.documents.some(doc => doc.object_key === input.objectKey)) return false;
     this.db.documents.push({ id: randomUUID(), case_id: input.caseId, patient_id: actor.id, kind: input.kind, object_key: input.objectKey, original_name: input.originalName, mime_type: input.mimeType, bytes: input.bytes, uploaded_at: now() });
     row.updated_at = now();
     this.persist();
+    return true;
+  }
+
+  documentForActor(actor: Actor, documentId: string) {
+    const doc = this.db.documents.find(d => d.id === documentId);
+    if (!doc) throw new HttpError(404, "Hujjat topilmadi yoki unga ruxsat yo‘q.");
+    if (doc.patient_id !== actor.id && !this.staffCanAccess(actor, doc.case_id)) throw new HttpError(404, "Hujjat topilmadi yoki unga ruxsat yo‘q.");
+    return { ...doc };
   }
 
   async openDocument(actor: Actor, documentId: string) {
-    const doc = this.db.documents.find(d => d.id === documentId);
-    if (!doc) throw new HttpError(404, "Hujjat topilmadi yoki unga ruxsat yo‘q.");
-    if (doc.patient_id === actor.id) return { ...doc };
-    if (!this.staffCanAccess(actor, doc.case_id)) throw new HttpError(404, "Hujjat topilmadi yoki unga ruxsat yo‘q.");
+    const doc = this.documentForActor(actor, documentId);
+    if (doc.patient_id === actor.id) return doc;
     this.db.access.push({ id: randomUUID(), document_id: doc.id, document_name: doc.original_name, case_id: doc.case_id, viewer_id: actor.id, viewer_name: this.approvedStaff(actor.id)!.full_name, viewed_at: now() });
     this.persist();
     return { ...doc };

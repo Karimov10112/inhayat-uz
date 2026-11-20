@@ -51,16 +51,17 @@ create policy "staff read own application" on public.staff_profiles for select t
 -- back to 'pending' so license/organization changes are re-verified.
 drop policy if exists "staff submit own application" on public.staff_profiles;
 create policy "staff submit own application" on public.staff_profiles for insert to authenticated
-  with check (id = auth.uid() and status = 'pending' and reviewed_by is null);
+  with check (id = auth.uid() and status = 'pending' and reviewed_by is null and reviewed_at is null and review_note = '');
 drop policy if exists "staff edit own application" on public.staff_profiles;
 create policy "staff edit own application" on public.staff_profiles for update to authenticated
   using (id = auth.uid() and not public.is_catalog_admin())
-  with check (id = auth.uid() and status = 'pending');
+  with check (id = auth.uid() and status = 'pending' and reviewed_by is null and reviewed_at is null and review_note = '');
 
 drop policy if exists "admins review applications" on public.staff_profiles;
 create policy "admins review applications" on public.staff_profiles for update to authenticated
   using (public.is_catalog_admin()) with check (public.is_catalog_admin());
 
+revoke all on public.staff_profiles from public, anon, authenticated;
 grant select, insert, update on public.staff_profiles to authenticated;
 
 -- Directory of approved staff that patients can choose from (no license / phone).
@@ -127,8 +128,10 @@ create policy "patients share own case" on public.case_shares for insert to auth
 drop policy if exists "patients manage own shares" on public.case_shares;
 create policy "patients manage own shares" on public.case_shares for update to authenticated
   using (patient_id = auth.uid())
-  with check (patient_id = auth.uid() and (active = false or public.is_approved_staff_id(staff_id)));
+  with check (patient_id = auth.uid() and exists (select 1 from public.cases c where c.id = case_id and c.patient_id = auth.uid())
+    and (active = false or public.is_approved_staff_id(staff_id)));
 
+revoke all on public.case_shares from public, anon, authenticated;
 grant select, insert, update on public.case_shares to authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -181,13 +184,14 @@ drop policy if exists "case parties write notes" on public.case_notes;
 create policy "case parties write notes" on public.case_notes for insert to authenticated
   with check (
     author_id = auth.uid() and (
-      (kind = 'message' and author_is_staff = false
+      (kind = 'message' and not author_is_staff and author_name = ''
         and exists (select 1 from public.cases c where c.id = case_id and c.patient_id = auth.uid()))
       or (kind in ('message', 'document_request', 'conclusion') and author_is_staff = true
         and public.staff_can_access_case(case_id)
         and author_name = (select s.full_name from public.staff_profiles s where s.id = auth.uid()))
     )
   );
+revoke all on public.case_notes from public, anon, authenticated;
 grant select, insert on public.case_notes to authenticated;
 
 -- Staff change case status only through this function (they cannot edit other columns).
@@ -227,25 +231,19 @@ create policy "viewers log own access" on public.document_access_log for insert 
       exists (select 1 from public.cases c where c.id = case_id and c.patient_id = auth.uid())
       or public.staff_can_access_case(case_id)
     )
-    and exists (select 1 from public.medical_documents d where d.id = document_id and d.case_id = case_id)
+    and exists (select 1 from public.medical_documents d where d.id = document_id and d.case_id = document_access_log.case_id)
   );
 drop policy if exists "patients see access log" on public.document_access_log;
 create policy "patients see access log" on public.document_access_log for select to authenticated
   using (exists (select 1 from public.cases c where c.id = case_id and c.patient_id = auth.uid()));
+revoke all on public.document_access_log from public, anon, authenticated;
 grant select, insert on public.document_access_log to authenticated;
 
--- ---------------------------------------------------------------------------
--- Patients registered with phone + password have the phone only in metadata.
--- Copy it into the profile so the doctor can call the patient.
--- ---------------------------------------------------------------------------
-create or replace function public.create_patient_profile() returns trigger
-language plpgsql security definer set search_path = '' as $$
-begin
-  insert into public.profiles (id, full_name, phone)
-  values (new.id, nullif(left(new.raw_user_meta_data ->> 'full_name', 120), ''), coalesce(new.phone, left(new.raw_user_meta_data ->> 'phone', 20)))
-  on conflict (id) do nothing;
-  return new;
-end;
-$$;
-update public.profiles p set phone = left(u.raw_user_meta_data ->> 'phone', 20)
-from auth.users u where u.id = p.id and p.phone is null and u.raw_user_meta_data ? 'phone';
+create index if not exists case_shares_staff_active_idx on public.case_shares(staff_id, case_id) where active;
+create index if not exists case_shares_patient_active_idx on public.case_shares(patient_id, staff_id) where active;
+create index if not exists document_access_log_case_idx on public.document_access_log(case_id, viewed_at desc);
+
+revoke all on function public.is_approved_staff(), public.is_approved_staff_id(uuid),
+  public.staff_can_access_case(uuid), public.staff_can_access_patient(uuid) from public, anon;
+grant execute on function public.is_approved_staff(), public.is_approved_staff_id(uuid),
+  public.staff_can_access_case(uuid), public.staff_can_access_patient(uuid) to authenticated;

@@ -5,6 +5,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2, Circle, ExternalLink, FileText, I
 import { api, openDocument } from "../lib/api";
 import { CHECKLIST_LABELS, DOC_KIND_LABELS, PATHWAY_LABELS, STATUS_LABELS, STATUS_ORDER, formatDate } from "../lib/labels";
 import type { CaseBundle, SharedCaseRow, StaffProfile } from "../lib/types";
+import { activityEvent } from "./activity-bell";
 
 const waiting = (r: SharedCaseRow) => !!r.last_patient_message_at && (!r.last_staff_message_at || r.last_staff_message_at < r.last_patient_message_at);
 const hoursSince = (iso: string | null) => (iso ? (Date.now() - new Date(iso).getTime()) / 36e5 : 0);
@@ -23,7 +24,13 @@ export function DoctorWorkspace({ staff }: { staff: StaffProfile }) {
     catch (err) { setError(err instanceof Error ? err.message : "Bemorlar ro‘yxatini yuklab bo‘lmadi."); }
     finally { setLoading(false); }
   }, []);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const refresh = () => void load();
+    refresh();
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener(activityEvent, refresh);
+    return () => { window.clearInterval(timer); window.removeEventListener(activityEvent, refresh); };
+  }, [load]);
 
   // Patients waiting for a reply first, then most recently shared.
   const sorted = useMemo(() => [...rows].sort((a, b) => Number(waiting(b)) - Number(waiting(a)) || b.shared_at.localeCompare(a.shared_at)), [rows]);
@@ -31,6 +38,7 @@ export function DoctorWorkspace({ staff }: { staff: StaffProfile }) {
     (!filter || (filter === "waiting" ? waiting(r) : r.case.status === filter)) &&
     `${r.patient.full_name} ${r.patient.phone} ${r.case.preferred_region}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
   const count = (status: string) => rows.filter(r => r.case.status === status).length;
+  const waitingCount = rows.filter(waiting).length;
   const current = rows.find(r => r.case.id === selected);
 
   if (current) return <CaseDetail key={current.case.id} row={current} staff={staff} onBack={() => { setSelected(""); void load(); }}/>;
@@ -54,13 +62,19 @@ export function DoctorWorkspace({ staff }: { staff: StaffProfile }) {
         ))}
       </div>
 
+      <section className="card workload" aria-label="Shifokor ish yuklamasi">
+        <h2>Ish yuklamasi</h2>
+        <div><span>Javob kutayotgan murojaatlar</span><strong>{waitingCount} / {rows.length}</strong></div>
+        <progress aria-label="Javob kutayotgan murojaatlar ulushi" value={waitingCount} max={Math.max(rows.length, 1)}/>
+        <p className="muted">{rows.reduce((sum, row) => sum + row.documents, 0)} ta hujjat</p>
+      </section>
       <label className="search"><Search size={16}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Ism, telefon yoki hudud bo‘yicha qidirish"/></label>
       {error && <p className="error">{error}</p>}
 
       {loading ? <div className="loading inline"><LoaderCircle className="spin"/> Yuklanmoqda…</div> : filtered.length === 0 ? (
         <div className="empty"><Inbox size={30}/><b>{rows.length ? "Mos bemor topilmadi" : "Hozircha bemor yo‘q"}</b><span>{rows.length ? "Filtrni o‘zgartiring." : "Bemor o‘z kabinetida sizni tanlab ruxsat berganda shu yerda paydo bo‘ladi."}</span></div>
       ) : (
-        <table className="table">
+        <div className="table-scroll"><table className="table">
           <thead><tr><th>Bemor</th><th>Yo‘nalish</th><th>Hudud</th><th>Hujjat</th><th>Holat</th><th>Ulashilgan</th></tr></thead>
           <tbody>
             {filtered.map(r => (
@@ -75,7 +89,7 @@ export function DoctorWorkspace({ staff }: { staff: StaffProfile }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
     </div>
   );
@@ -104,12 +118,14 @@ function CaseDetail({ row, staff, onBack }: { row: SharedCaseRow; staff: StaffPr
 
   const load = useCallback(async () => {
     try { setBundle(await api<CaseBundle>(`/api/cases/${row.case.id}`)); }
-    catch (err) { setMessage(err instanceof Error ? err.message : "Yuklanmadi."); }
+    catch (err) { setBundle(null); setMessage(err instanceof Error ? err.message : "Yuklanmadi."); }
   }, [row.case.id]);
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 30000);
-    return () => window.clearInterval(timer);
+    const refresh = () => void load();
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener(activityEvent, refresh);
+    return () => { window.clearInterval(timer); window.removeEventListener(activityEvent, refresh); };
   }, [load]);
 
   async function changeStatus(next: string) {

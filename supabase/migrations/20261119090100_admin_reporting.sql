@@ -51,6 +51,7 @@ alter table public.staff_review_log enable row level security;
 drop policy if exists "admins manage review log" on public.staff_review_log;
 create policy "admins manage review log" on public.staff_review_log for all to authenticated
   using (public.is_catalog_admin()) with check (public.is_catalog_admin() and admin_id = auth.uid());
+revoke all on public.staff_review_log from public, anon, authenticated;
 grant select, insert on public.staff_review_log to authenticated;
 
 create or replace function public.admin_recent_activity(max_rows int default 30)
@@ -104,4 +105,5 @@ create policy "admins read agent audit" on public.agent_audit for select to auth
 drop policy if exists "admins write agent audit" on public.agent_audit;
 create policy "admins write agent audit" on public.agent_audit for insert to authenticated
   with check (public.is_catalog_admin() and admin_id = auth.uid());
+revoke all on public.agent_audit from public, anon, authenticated;
 grant select, insert on public.agent_audit to authenticated;

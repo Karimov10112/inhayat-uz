@@ -1,0 +1,111 @@
+:root{--ink:#102f3c;--teal:#067768;--glass:rgba(255,255,255,.8);--glass-line:#c8e5e1;--glass-shadow:0 18px 45px #174b5714,inset 0 1px 0 #fff}
+body{background:radial-gradient(ellipse at 82% 3%,#d4f4ed,transparent 35rem),#f3fafb;color:var(--ink)}
+:where(a,button,input,select,textarea):focus-visible{outline:3px solid #168374;outline-offset:3px}
+.nav{width:calc(100% - 32px);height:auto;min-height:68px;margin:14px auto;padding:9px clamp(13px,2vw,25px);border:1px solid var(--glass-line);border-radius:28px;background:var(--glass);backdrop-filter:blur(20px) saturate(150%);box-shadow:var(--glass-shadow)}
+.brand-mark{background:linear-gradient(145deg,#0e9984,#075c60)!important;box-shadow:inset 0 1px 0 #ffffff70,0 6px 16px #06776833}
+.hero{margin:0 16px;border-radius:clamp(24px,4vw,56px);border:1px solid #c0e7e4;background:radial-gradient(ellipse at 82% 25%,#bceee3,transparent 44%),radial-gradient(ellipse at 12% 90%,#d4eafa,transparent 60%),#f4fbfc}
+.hero h1{color:#123442}.hero h1 em{color:#086e63}.hero-copy>p{color:#345661}
+.hero-actions,.assistant-topics{display:flex;flex-wrap:wrap;gap:10px}
+.hero-actions a,.hero-actions button,.assistant-topics button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 17px;border-radius:999px;font:inherit;font-weight:700;border:1px solid #b4dacf;background:#ffffffbc;color:#115c53;cursor:pointer}
+.hero-actions .hero-primary,.assistant-topics button[aria-pressed=true]{background:linear-gradient(160deg,#087c6c,#0c505a);color:white;border-color:#08665b}
+.doctor-hero .hero-photo-wrap{border-radius:46% 46% 28px 28px;border:3px solid #ffffffc7}
+.hero .doctor-caption{position:static;margin-top:10px;background:#fff9;border:1px solid #fff;border-radius:18px;padding:12px 16px;box-shadow:var(--glass-shadow)}
+.metrics,.section-menu-item,.clinic-item,.auth-card,.ov-card,.patient-assistant{border:1px solid var(--glass-line);background:var(--glass);box-shadow:var(--glass-shadow);border-radius:22px}
+.section-menu-item:hover,.hero-actions button:hover{transform:translateY(-2px)}
+.auth-page{background:radial-gradient(ellipse at 15% 15%,#0d7d74,transparent 44%),linear-gradient(132deg,#102e42,#103c49)}
+.auth-tabs{position:relative;border-radius:999px;background:#d9eee9;isolation:isolate}
+.auth-tabs button,.auth-tabs .selected{position:relative;z-index:1;background:transparent;box-shadow:none;border-radius:999px;color:#365b62;min-height:40px;font-size:.875rem}
+.auth-tabs .selected{color:#0d564d}.auth-drop,.nav-drop{display:none}
+.auth-drop{display:block;position:absolute;inset:4px auto 4px 4px;width:calc(50% - 4px);border-radius:inherit;background:linear-gradient(170deg,#fff,#edfdf8);box-shadow:0 3px 10px #13574c22,inset 0 0 0 1px white;transition:transform .45s cubic-bezier(.2,1.2,.3,1)}
+.auth-tabs[data-mode=register] .auth-drop{transform:translateX(100%)}
+.patient-assistant{padding:20px;margin:16px 0 20px;background:linear-gradient(130deg,#fff,#e1f6f0)}
+.patient-assistant h2,.assistant-stats{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 13px}
+.assistant-stats span{padding:5px 10px;border-radius:10px;background:#fff;color:#235761}
+.patient-assistant small{color:#3d5860}
+.activity-bell button{min-height:42px;display:flex;align-items:center;gap:8px;border:1px solid #b6d9d0;background:#f0fffa;color:#165c56;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.875rem}
+.activity-bell span:not(:empty){display:block;margin-top:6px;padding:7px 10px;border-radius:12px;background:#d7f6ed;color:#173b40;font-size:.875rem}
+@media(min-width:921px){
+  .navlinks{--drop:0;position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:4px;border-radius:999px;background:#dff2f0;border:1px solid #cbe4e2}
+  .navlinks button{position:relative;padding:8px clamp(6px,1vw,16px);color:#244b57;min-height:40px;font-size:clamp(.75rem,1vw,.875rem);white-space:normal;line-height:1.1}
+  .navlinks[data-active=centres]{--drop:1}.navlinks[data-active=budget]{--drop:2}.navlinks[data-active=faq]{--drop:3}
+  .navlinks:is([data-active=how],[data-active=centres],[data-active=budget],[data-active=faq]) .nav-drop{opacity:1}
+  .nav-drop{display:block;opacity:0;position:absolute;inset:4px auto 4px 4px;width:calc((100% - 8px)/4);border-radius:999px;background:linear-gradient(#fff,#eefcf8);box-shadow:0 3px 10px #105b4e21,inset 0 0 0 1px #fff;transform:translateX(calc(var(--drop)*100%));transition:transform .46s cubic-bezier(.19,1.23,.38,1),opacity .2s}
+}
+html[data-theme=dark] .hero h1 em{color:#91e5ce}
+html[data-theme=dark] .navlinks:not(.open){background:#21474b;border-color:#315b5e}
+html[data-theme=dark] .navlinks button{color:#e2f5f1}
+html[data-theme=dark] .navlinks button[aria-current=location]{color:#104e46}
+html[data-theme=dark] .navlinks.open button[aria-current=location]{color:#9ee9d3}
+html[data-theme=dark] .patient-assistant{background:#18383b;color:#edf8f3;border-color:#315b5e}
+html[data-theme=dark] .patient-assistant small{color:#c7e5e0}
+@media(max-width:800px){.hero .hero-visual{order:0}.hero .doctor-hero .hero-photo-wrap{height:clamp(280px,68vw,420px)!important}}
+@media(max-width:480px){.hero{margin-inline:8px}.nav{width:calc(100% - 16px);margin-top:8px}.hero .doctor-hero .hero-photo-wrap{height:clamp(250px,82vw,360px)!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Metrics on glass: dark text so the numbers stay readable */
+.metrics{color:var(--ink);margin-top:16px}
+.metrics b{color:#087a6c}
+.metrics span{color:#3f5f68}
+.metrics div{border-right-color:#c8e5e1}
+html[data-theme=dark] .metrics{background:#18383b;border-color:#315b5e}
+html[data-theme=dark] .metrics b{color:#8ce0c5}
+html[data-theme=dark] .metrics span{color:#c7e5e0}
+html[data-theme=dark] .metrics div{border-right-color:#315b5e}
+
+/* Budget transport picker */
+.transport-picker{margin:12px 0 16px}
+.transport-picker>span{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.transport-picker>div{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.transport-picker button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 6px;border-radius:12px;border:1px solid #c9dcd8;background:#fff;color:#3f5a62;font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.transport-picker button:hover{border-color:#8fcabd}
+.transport-picker button.active{border:2px solid #0b7a6c;background:#e3f5f0;color:#0b6a5e;font-weight:700}
+html[data-theme=dark] .transport-picker button{background:#173438;color:#d6ebe5;border-color:#426f70}
+html[data-theme=dark] .transport-picker button.active{background:#235451;color:#a6f0d9;border-color:#5fc9ad}
+@media(max-width:480px){.metrics div{border-right:0}}
+
+/* Stronger active state for the compact top navigation */
+@media(min-width:921px){
+  .nav-drop{background:linear-gradient(160deg,#0b8a78,#0c5560)!important;box-shadow:0 4px 12px #0b5f5640,inset 0 1px 0 #ffffff55!important}
+  .navlinks button{transition:color .25s}
+  .navlinks button[aria-current=location]{color:#fff!important}
+  .navlinks button:not([aria-current=location]):hover{color:#086e63}
+}
+.section-menu-item.active{border-color:#7fcfbd;background:linear-gradient(135deg,#ffffff,#dff6ef);box-shadow:0 10px 26px #0b6a5e1f,inset 0 1px 0 #fff}
+.section-menu-item.active .section-menu-icon{background:linear-gradient(150deg,#0b8a78,#0c5560);color:#fff}
+html[data-theme=dark] .section-menu-item.active{background:#1f4a4b;border-color:#5fc9ad}
+.planner{margin:16px;border-radius:clamp(24px,4vw,48px);background:radial-gradient(ellipse at 85% 10%,#14907f66,transparent 50%),linear-gradient(140deg,#0c4a52,#0b3a44)}
+footer{background:linear-gradient(140deg,#0c3f49,#0b2f3c)}
+@media(max-width:480px){.planner{margin:8px}}
+.auth-page .auth-card{background:linear-gradient(170deg,#ffffff,#f1fbf8);border-color:#ffffff}
+html[data-theme=dark] .auth-page .auth-card{background:#18383b;border-color:#315b5e}
+
+/* Patient cabinet: keep the sidebar in view while the content scrolls */
+@media(min-width:821px){
+  .sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:radial-gradient(ellipse at 0 0,#168477,transparent 60%),linear-gradient(146deg,#103d49,#122e41)}
+  .sidebar nav a.active{background:linear-gradient(155deg,#edfff6,#beece4);color:#134940;box-shadow:inset 0 1px 0 #fff,0 6px 15px #09272b40}
+}
+.sidebar .activity-bell button{background:#ffffff14;border-color:#ffffff2e;color:#e4f5f2}
+.sidebar .activity-bell button:hover{background:#ffffff22}
+
+/* Compact mobile layout: 2-column section tiles, no horizontal overflow */
+@media(max-width:480px){
+  .section-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:18px 12px 30px}
+  .section-menu-item{flex-direction:column;align-items:flex-start;gap:8px;padding:13px 12px;border-radius:18px;position:relative;min-height:96px}
+  .section-menu-item small{display:none}
+  .section-menu-item strong{font-size:13px;line-height:1.25}
+  .section-menu-item>svg{position:absolute;top:13px;right:11px}
+  .section-menu-icon{width:34px;height:34px}
+  .metrics{margin:12px 12px 0;padding:12px 14px}
+  .site-preferences select{min-width:0;width:78px}
+}
+
+/* Dark theme contrast fixes */
+html[data-theme=dark] .costs p span,html[data-theme=dark] .calculator-title span,html[data-theme=dark] .range-labels span{color:#a9c7c0}
+html[data-theme=dark] .costs p b{color:#e6f6f1}
+html[data-theme=dark] .total{background:#123033;color:#edf8f3}
+html[data-theme=dark] .total strong{color:#8ce0c5}
+html[data-theme=dark] .hero .doctor-caption{background:#18383bcc;border-color:#315b5e;color:#d8f1ea}
+html[data-theme=dark] .hero .doctor-caption strong{color:#e9faf5}
+html[data-theme=dark] .hero .doctor-caption small{color:#a9c7c0}
+html[data-theme=dark] .hero-actions button{background:#18383b;color:#d8f1ea;border-color:#426f70}
+html[data-theme=dark] body{background:radial-gradient(ellipse at 82% 3%,#12403f,transparent 35rem),#0d2024}

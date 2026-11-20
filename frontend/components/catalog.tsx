@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Hospital, MapPin, Phone, Search, Bookmark, GitCompareArrows } from "lucide-react";
 import { centres as initialCentres, clinics as initialClinics, regions, type Centre, type Clinic, type ClinicService } from "../lib/catalog";
-import { supabase } from "../lib/supabase";
 import { ClinicMap } from "./clinic-map";
 import { ClinicComparison, serviceLabelsMap } from "./clinic-comparison";
 import { useSitePreferences } from "./site-preferences";
@@ -10,27 +9,6 @@ import { useSitePreferences } from "./site-preferences";
 export function useCatalog() {
   const [centres, setCentres] = useState<Centre[]>(initialCentres);
   const [clinics, setClinics] = useState<Clinic[]>(initialClinics);
-  useEffect(() => {
-    if (!supabase) return;
-    let active = true;
-    Promise.all([
-      supabase.from("centres").select("id,name,speciality,address,phone,source_url,pathways,active").eq("active", true).order("name"),
-      supabase.from("clinics").select("*").eq("active", true).order("name")
-    ]).then(([c, r]) => {
-      if (!active) return;
-      if (!c.error) setCentres(c.data as Centre[]);
-      if (!r.error) {
-        const remote = r.data as Clinic[];
-        const merged = new Map(initialClinics.map(item => [item.name, item]));
-        remote.forEach(item => {
-          const baseline = merged.get(item.name);
-          merged.set(item.name, { ...baseline, ...item, services: item.services || baseline?.services || ["consultation"] });
-        });
-        setClinics([...merged.values()]);
-      }
-    });
-    return () => { active = false; };
-  }, []);
   return { centres, clinics };
 }
 

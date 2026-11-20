@@ -20,9 +20,9 @@ export function ClinicComparison({ clinics, remove, clear }: { clinics: Clinic[]
 
   function download() {
     const content = clinics.map(c => `${c.name}\nRegion: ${c.region}\nAddress: ${c.address}\nPhone: ${c.phone || '-'}\nServices: ${(c.services || []).map(s => currentServiceLabels[s] || s).join(', ')}\nSource: ${c.source_url}\nDirections: ${mapLinks(c.name, c.address).directions}`).join('\n\n');
-    const blob = new Blob([`LifeBridge — ${strings.cc_title}\n\n` + content], { type:'text/plain;charset=utf-8' });
+    const blob = new Blob([`InHayat — ${strings.cc_title}\n\n` + content], { type:'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a'); link.href = url; link.download = `lifebridge-clinics-${locale}.txt`; link.click();
+    const link = document.createElement('a'); link.href = url; link.download = `inhayat-clinics-${locale}.txt`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 

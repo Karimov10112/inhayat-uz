@@ -9,6 +9,8 @@ import {
 import { openDocument, uploadDocument } from "../lib/api";
 import { regions } from "../lib/catalog";
 import { api, signOut, useAuthState } from "../lib/session";
+import { ActivityBell, activityEvent } from "./activity-bell";
+import { PatientAssistant } from "./patient-assistant";
 import type { CaseBundle, CaseRow, Me, Profile } from "../lib/types";
 import { AuthPanel } from "./auth-panel";
 import { AccessLog, NotesPanel, SharePanel, useStatusLabel } from "./case-collaboration";
@@ -19,7 +21,7 @@ const PATHWAYS = ["kidney", "liver", "heart", "stem_cell", "other"];
 const DOC_KINDS = ["lab_result", "imaging", "referral", "identity", "other"] as const;
 const MAX_BYTES = 10 * 1024 * 1024;
 
-function Logo() { return <Link href="/" className="brand"><span className="brand-mark"><HeartPulse size={20}/></span><span>Life<span>Bridge</span></span></Link>; }
+function Logo() { return <Link href="/" className="brand"><span className="brand-mark"><HeartPulse size={20}/></span><span>In<span>Hayat</span></span></Link>; }
 
 export function NotConfigured() {
   const { strings } = useSitePreferences();
@@ -55,7 +57,6 @@ export function Cabinet() {
   const auth = useAuthState();
   if (auth.status === "loading") return <div className="cabinet-loading"><LoaderCircle className="spin"/> {strings.cab_loading}</div>;
   if (auth.status === "backend_down") return <BackendDown/>;
-  if (auth.status === "misconfigured") return <NotConfigured/>;
   if (auth.status === "signed_out") return <AuthPanel/>;
   return <CabinetData demo={auth.config.mode === "demo"} key={auth.token}/>;
 }
@@ -109,6 +110,33 @@ function Dashboard({ demo, me, setProfile, cases, activeCase, selectCase, reload
   const [bundle, setBundle] = useState<CaseBundle | null>(null);
   const [seenAt, setSeenAt] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
+  const [navSection, setNavSection] = useState("top");
+  const pinnedNav = useRef<string | null>(null);
+
+  // Highlight the sidebar link for the section currently in view.
+  useEffect(() => {
+    // A clicked link stays highlighted until the user scrolls by hand ("share" and
+    // "messages" sit side by side, so position alone cannot tell them apart).
+    const ids = ["top", "documents", "share"];
+    const update = () => {
+      if (pinnedNav.current) { setNavSection(pinnedNav.current); return; }
+      let current = "top";
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 140) current = id;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = "share";
+      setNavSection(current);
+    };
+    const unpin = () => { pinnedNav.current = null; };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    for (const type of ["wheel", "touchmove", "keydown"]) window.addEventListener(type, unpin, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", update);
+      for (const type of ["wheel", "touchmove", "keydown"]) window.removeEventListener(type, unpin);
+    };
+  }, []);
 
   // Values chosen on the homepage "start" form arrive as ?region=…&pathway=…
   useEffect(() => {
@@ -137,7 +165,9 @@ function Dashboard({ demo, me, setProfile, cases, activeCase, selectCase, reload
     void loadBundle();
     const markSeen = window.setTimeout(() => { try { window.localStorage.setItem(key, new Date().toISOString()); } catch { /* ignore */ } }, 4000);
     const poll = window.setInterval(() => void loadBundle(), 30000);
-    return () => { window.clearTimeout(markSeen); window.clearInterval(poll); };
+    const refresh = () => void loadBundle();
+    window.addEventListener(activityEvent, refresh);
+    return () => { window.clearTimeout(markSeen); window.clearInterval(poll); window.removeEventListener(activityEvent, refresh); };
   }, [caseId, loadBundle]);
 
   const phone = me.user.phone || profile.phone || "";
@@ -227,12 +257,25 @@ function Dashboard({ demo, me, setProfile, cases, activeCase, selectCase, reload
           </div>
         </div>
         <nav>
-          <a className="active" href="#top"><HeartPulse size={17}/> {strings.cab_nav_roadmap}</a>
-          <a href="#documents"><FileText size={17}/> {strings.cab_nav_docs}</a>
-          <a href="#share"><UserCheck size={17}/> {strings.share_title}</a>
-          <a href="#messages"><MessageSquareText size={17}/> {strings.notes_title}{unread > 0 && <em className="nav-badge">{unread}</em>}</a>
+          {([
+            ["top", HeartPulse, strings.cab_nav_roadmap],
+            ["documents", FileText, strings.cab_nav_docs],
+            ["share", UserCheck, strings.share_title],
+            ["messages", MessageSquareText, strings.notes_title],
+          ] as const).map(([id, Icon, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className={navSection === id ? "active" : ""}
+              aria-current={navSection === id ? "location" : undefined}
+              onClick={() => { pinnedNav.current = id; setNavSection(id); }}
+            >
+              <Icon size={17}/> {label}{id === "messages" && unread > 0 && <em className="nav-badge">{unread}</em>}
+            </a>
+          ))}
           <a href="/#centres"><MapPin size={17}/> {strings.cab_nav_centres}</a>
         </nav>
+        <ActivityBell fetchNotice={api}/>
         <button className="signout" onClick={() => void signOut()}>
           <LogOut size={17}/> {strings.cab_signout}
         </button>
@@ -252,6 +295,7 @@ function Dashboard({ demo, me, setProfile, cases, activeCase, selectCase, reload
           </div>
         </header>
 
+        <PatientAssistant/>
         {notice && (
           <div className="notice">
             <Check size={17}/>{notice}

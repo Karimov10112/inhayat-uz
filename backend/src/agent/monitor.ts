@@ -52,9 +52,8 @@ export function scanPlatform(cases: CaseOverviewRow[], staff: StaffProfile[], co
     }
   }
 
-  if (context.mode === "demo") alerts.push({ id: "demo-mode", level: "info", title: "Demo rejim", detail: "Ma’lumotlar serverdagi demo faylda saqlanmoqda. Haqiqiy bemor ma’lumotlarini kiritmang.", suggestion: "Ishga tushirishdan oldin Supabase va R2 kalitlarini ulang." });
-  if (context.storage === "local" && context.mode !== "demo") alerts.push({ id: "local-storage", level: "critical", title: "Fayllar serverda saqlanmoqda", detail: "R2 sozlanmagan — tibbiy fayllar server diskida.", suggestion: "R2_* o‘zgaruvchilarini sozlang." });
-  if (context.aiProvider === "offline") alerts.push({ id: "ai-offline", level: "info", title: "AI model ulanmagan", detail: "Agent oddiy (qoidaga asoslangan) rejimda ishlayapti.", suggestion: "ANTHROPIC_API_KEY yoki OPENAI_API_KEY qo‘shing." });
+  if (context.mode === "demo") alerts.push({ id: "demo-mode", level: "info", title: "Demo rejim", detail: "Ma’lumotlar serverdagi demo faylda saqlanmoqda. Haqiqiy bemor ma’lumotlarini kiritmang.", suggestion: "Bu nusxa faqat lokal demo uchun." });
+  if (context.aiProvider === "offline") alerts.push({ id: "ai-offline", level: "info", title: "Lokal agent", detail: "Agent oddiy (qoidaga asoslangan) rejimda ishlayapti.", suggestion: "Tashqi AI ulanishi bu nusxada ataylab o‘chirilgan." });
 
   const order: Record<AlertLevel, number> = { critical: 0, warning: 1, info: 2 };
   return alerts.sort((a, b) => order[a.level] - order[b.level]);
