@@ -11,7 +11,7 @@ export interface StaffProfile {
   organization: string; region: string; phone: string; status: "pending" | "approved" | "rejected" | "suspended";
   review_note: string; created_at: string; reviewed_at: string | null;
 }
-export interface Me { user: { id: string; isAdmin: boolean; email: string; phone: string }; staff: StaffProfile | null; mode: "demo" | "supabase" }
+export interface Me { user: { id: string; isAdmin: boolean; email: string; phone: string }; staff: StaffProfile | null; mode: "demo" }
 export interface CaseOverviewRow { case_id: string; patient_name: string; region: string; pathway: string; status: CaseStatus; created_at: string; updated_at: string; documents: number; active_shares: number; last_patient_message_at: string | null; last_staff_message_at: string | null }
 export interface Alert { id: string; level: "critical" | "warning" | "info"; title: string; detail: string; suggestion: string; case_id?: string; staff_id?: string }
 export interface Dashboard {

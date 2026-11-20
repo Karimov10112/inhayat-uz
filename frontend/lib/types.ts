@@ -8,4 +8,4 @@ export interface Share { id: string; case_id: string; staff_id: string; active: 
 export interface Note { id: string; author_id: string; author_name: string; author_is_staff: boolean; kind: "message" | "document_request" | "conclusion" | "status"; body: string; created_at: string }
 export interface AccessEntry { id: string; document_id: string; document_name: string; viewer_name: string; viewed_at: string }
 export interface CaseBundle { viewer: "patient" | "staff"; case: CaseRow; patient: Profile; documents: Doc[]; checklist: string[]; shares: Share[]; notes: Note[]; accessLog: AccessEntry[] }
-export interface Me { user: { id: string; isAdmin: boolean; email: string; phone: string }; profile: Profile; mode: "demo" | "supabase" }
+export interface Me { user: { id: string; isAdmin: boolean; email: string; phone: string }; profile: Profile; mode: "demo" }

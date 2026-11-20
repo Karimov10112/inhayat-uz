@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { BadgeCheck, LoaderCircle, LogOut } from "lucide-react";
-import { supabase } from "../lib/supabase";
 import { api } from "../lib/session";
 import { REGIONS } from "../lib/labels";
 import type { StaffProfile } from "../lib/types";
@@ -37,18 +36,6 @@ export function ApplicationForm({ email, existing, demo, onSaved, onSignOut }: {
   const [orgChoice, setOrgChoice] = useState(existing?.organization ? (DEMO_ORGS.includes(existing.organization) ? existing.organization : OTHER) : "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  // With Supabase, institutions come from the public catalogue.
-  useEffect(() => {
-    if (!supabase) return;
-    Promise.all([supabase.from("centres").select("name").eq("active", true), supabase.from("clinics").select("name").eq("active", true)])
-      .then(([centres, clinics]) => {
-        const names = [...(centres.data ?? []), ...(clinics.data ?? [])].map(row => row.name as string).sort((a, b) => a.localeCompare(b));
-        if (!names.length) return;
-        setOrganizations(names);
-        if (existing?.organization) setOrgChoice(names.includes(existing.organization) ? existing.organization : OTHER);
-      });
-  }, [existing?.organization]);
 
   const set = (key: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [key]: e.target.value });
 

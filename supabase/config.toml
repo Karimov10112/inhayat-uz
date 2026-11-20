@@ -1,0 +1,5 @@
+project_id = "inhayat"
+
+[functions.inhayat-api]
+# Routes validate Supabase user JWTs against Auth before using RLS.
+verify_jwt = false

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./liquid-glass.css";
 
 export const metadata: Metadata = {
   title: { default: "InHayat Pro — shifokorlar portali", template: "%s | InHayat Pro" },

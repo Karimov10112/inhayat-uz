@@ -73,6 +73,15 @@ export function AdminDashboard({ demo, onOpenAgent, onOpenReviews }: { demo: boo
         <div className="legend">
           {STATUS_ORDER.map(st => <span key={st}><i className={`dot status-${st}`}/>{STATUS_LABELS[st]} <b>{s.cases_by_status[st] || 0}</b></span>)}
         </div>
+        <div className="status-detail">
+          {STATUS_ORDER.map(st => (
+            <div key={st}>
+              <span>{STATUS_LABELS[st]}</span>
+              <progress className={`bar-${st}`} aria-label={STATUS_LABELS[st]} value={s.cases_by_status[st] || 0} max={totalCases}/>
+              <strong>{s.cases_by_status[st] || 0}</strong>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="dash-grid">

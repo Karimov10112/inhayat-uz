@@ -42,7 +42,7 @@ export const t = {
     // How it works
     how_eyebrow: "Oddiy va tushunarli",
     how_title: "Har bir qadamda siz bilanmiz.",
-    how_desc: "Muolajaga tayyorgarlik ko‘rish murakkab bo‘lishi mumkin. LifeBridge uni tushunarli bosqichlarga ajratadi.",
+    how_desc: "Muolajaga tayyorgarlik ko‘rish murakkab bo‘lishi mumkin. InHayat uni tushunarli bosqichlarga ajratadi.",
     step1_title: "Hududingizdagi klinikani tanlang",
     step1_desc: "Yaqin tibbiyot muassasasida kerakli tahlillar ro‘yxatini oling.",
     step1_btn: "Klinikalarni topish",
@@ -356,7 +356,7 @@ export const t = {
     // How it works
     how_eyebrow: "Просто и понятно",
     how_title: "Мы с вами на каждом шагу.",
-    how_desc: "Подготовка к лечению может казаться сложной. LifeBridge разбивает её на понятные этапы.",
+    how_desc: "Подготовка к лечению может казаться сложной. InHayat разбивает её на понятные этапы.",
     step1_title: "Выберите клинику в своем регионе",
     step1_desc: "Получите список необходимых анализов в ближайшем медицинском учреждении.",
     step1_btn: "Найти клиники",
@@ -670,7 +670,7 @@ export const t = {
     // How it works
     how_eyebrow: "Simple and transparent",
     how_title: "We are with you at every step.",
-    how_desc: "Preparing for medical treatment can be overwhelming. LifeBridge breaks it down into manageable stages.",
+    how_desc: "Preparing for medical treatment can be overwhelming. InHayat breaks it down into manageable stages.",
     step1_title: "Choose a clinic in your region",
     step1_desc: "Get your required lab tests checklist from a nearby medical facility.",
     step1_btn: "Find clinics",
@@ -944,4 +944,3 @@ export const t = {
     new_badge: "new",
   }
 } as const;
-

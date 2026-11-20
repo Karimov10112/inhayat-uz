@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bot, Clock3, FlaskConical, HeartPulse, LayoutDashboard, LoaderCircle, LogOut, ServerCrash, Settings2, ShieldCheck, ShieldX, Stethoscope, Users } from "lucide-react";
-import { supabase } from "../lib/supabase";
+import { Bot, Clock3, FlaskConical, HeartPulse, LayoutDashboard, LoaderCircle, LogOut, ServerCrash, ShieldCheck, ShieldX, Stethoscope, Users } from "lucide-react";
 import { api, signOut, useAuthState } from "../lib/session";
+import { ActivityBell } from "./activity-bell";
 import { ROLE_LABELS, STAFF_STATUS_LABELS } from "../lib/labels";
 import type { Me } from "../lib/types";
-import { AuthScreen, NewPasswordForm } from "./auth-screen";
+import { AuthScreen } from "./auth-screen";
 import { ApplicationForm } from "./application-form";
 import { DoctorWorkspace } from "./doctor-workspace";
 import { AdminReviews } from "./admin-reviews";
@@ -43,14 +43,6 @@ type Tab = "patients" | "dashboard" | "reviews" | "agent";
 
 export function PortalApp() {
   const auth = useAuthState();
-  const [recovery, setRecovery] = useState(false);
-
-  useEffect(() => {
-    if (!supabase) return;
-    const { data } = supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") setRecovery(true); });
-    return () => data.subscription.unsubscribe();
-  }, []);
-
   if (auth.status === "loading") return <div className="loading"><LoaderCircle className="spin"/> Yuklanmoqda…</div>;
   if (auth.status === "backend_down") {
     return <Centered icon={<ServerCrash size={36}/>} title="Server bilan bog‘lanib bo‘lmadi">
@@ -58,13 +50,7 @@ export function PortalApp() {
       <button className="primary" onClick={() => window.location.reload()}>Qayta urinish</button>
     </Centered>;
   }
-  if (auth.status === "misconfigured") {
-    return <Centered icon={<Settings2 size={36}/>} title="Portal sozlanmagan">
-      <p>Backend Supabase rejimida, lekin portalda <code>NEXT_PUBLIC_SUPABASE_URL</code> va <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> yo‘q. <code>portal/.env.local</code> faylini to‘ldiring.</p>
-    </Centered>;
-  }
   if (auth.status === "signed_out") return <AuthScreen config={auth.config}/>;
-  if (recovery) return <NewPasswordForm onDone={() => setRecovery(false)}/>;
   return <SignedIn key={auth.token} demo={auth.config.mode === "demo"}/>;
 }
 
@@ -132,6 +118,7 @@ function SignedIn({ demo }: { demo: boolean }) {
         <nav>
           {tabs.map(t => <button key={t.id} className={active === t.id ? "active" : ""} onClick={() => setTab(t.id)}>{t.icon} {t.label}</button>)}
         </nav>
+        <ActivityBell fetchNotice={api}/>
         <button className="signout" onClick={() => void signOut()}><LogOut size={16}/> Chiqish</button>
       </aside>
       <main className="content">

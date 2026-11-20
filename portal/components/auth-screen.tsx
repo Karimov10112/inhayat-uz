@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff, FileCheck2, FlaskConical, LoaderCircle, LockKeyhole, ShieldCheck, Users } from "lucide-react";
-import { requireSupabase } from "../lib/supabase";
 import { demoLogin, demoRegister, type BackendConfig } from "../lib/session";
 import { Brand } from "./portal-app";
 
@@ -37,19 +36,8 @@ export function AuthScreen({ config }: { config: BackendConfig }) {
         else await (mode === "login" ? demoLogin : demoRegister)({ email: cleanEmail, password });
         return;
       }
-      const supabase = requireSupabase();
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-        if (error) setError("Email yoki parol noto‘g‘ri, yoki email hali tasdiqlanmagan.");
-      } else if (mode === "register") {
-        const { data, error } = await supabase.auth.signUp({ email: cleanEmail, password, options: { emailRedirectTo: window.location.origin } });
-        if (error) setError(error.message.toLowerCase().includes("registered") ? ERRORS.ALREADY_EXISTS : "Hisob yaratilmadi. Qayta urinib ko‘ring.");
-        else if (data.user && data.user.identities?.length === 0) setError(ERRORS.ALREADY_EXISTS);
-        else if (!data.session) setMessage("Emailingizga tasdiqlash havolasi yuborildi. Havolani ochib, so‘ng kiring va arizani to‘ldiring.");
-      } else {
-        await supabase.auth.resetPasswordForEmail(cleanEmail, { redirectTo: window.location.origin });
-        setMessage("Agar bu email ro‘yxatdan o‘tgan bo‘lsa, parolni tiklash havolasi yuborildi.");
-      }
+      if (mode === "forgot") setMessage("Lokal demo rejimda parolni tiklash yo‘q. Administrator demo parolini almashtirishi mumkin.");
+      else await (mode === "login" ? demoLogin : demoRegister)({ email: cleanEmail, password });
     } catch (err) {
       const code = err instanceof Error ? err.message : "";
       setError(ERRORS[code] || code || "Server bilan bog‘lanib bo‘lmadi.");
@@ -136,9 +124,8 @@ export function NewPasswordForm({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     if (password.length < 10) { setError("Kamida 10 ta belgi."); return; }
     setBusy(true);
-    const { error } = await requireSupabase().auth.updateUser({ password });
     setBusy(false);
-    if (error) setError("Parol yangilanmadi. Yangi havola so‘rang."); else onDone();
+    setError("Lokal demo rejimda parolni tiklash o‘chirilgan.");
   }
   return (
     <main className="centered">

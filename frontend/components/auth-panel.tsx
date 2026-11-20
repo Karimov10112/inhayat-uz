@@ -118,7 +118,7 @@ export function AuthPanel({ admin = false }: { admin?: boolean }) {
       <header className="auth-top">
         <Link href="/" className="brand">
           <span className="brand-mark"><HeartPulse size={20} /></span>
-          <span>Life<span>Bridge</span></span>
+          <span>In<span>Hayat</span></span>
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <SitePreferencesControls />
@@ -128,7 +128,7 @@ export function AuthPanel({ admin = false }: { admin?: boolean }) {
 
       <div className="auth-grid">
         <section className="auth-intro">
-          <div className="eyebrow light">{admin ? "LifeBridge boshqaruvi" : strings.hero_all_in_one}</div>
+          <div className="eyebrow light">{admin ? "InHayat boshqaruvi" : strings.hero_all_in_one}</div>
           <h1>{admin ? "Tartibli ma’lumot. Ishonchli yordam." : strings.hero_doctor_title}</h1>
           <p>{strings.hero_desc}</p>
           <div className="auth-benefits">
@@ -139,9 +139,11 @@ export function AuthPanel({ admin = false }: { admin?: boolean }) {
         </section>
 
         <section className="auth-card auth-v2">
-          <div className="auth-tabs">
+          <div className="auth-tabs" data-mode={mode}>
+            <span aria-hidden="true" className="auth-drop"/>
             <button
               type="button"
+              aria-pressed={mode === "login"}
               onClick={() => { setMode("login"); setError(""); setMessage(""); }}
               className={mode === "login" ? "selected" : ""}
             >
@@ -149,6 +151,7 @@ export function AuthPanel({ admin = false }: { admin?: boolean }) {
             </button>
             <button
               type="button"
+              aria-pressed={mode === "register"}
               onClick={() => { setMode("register"); setError(""); setMessage(""); }}
               className={mode === "register" ? "selected" : ""}
             >

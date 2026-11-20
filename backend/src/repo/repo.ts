@@ -6,7 +6,7 @@ import type {
 /**
  * Every data operation the product needs. Two implementations:
  *  - DemoRepo: JSON file on the server, rules enforced in code (works with no setup)
- *  - SupabaseRepo: runs as the signed-in user, rules enforced by Postgres RLS
+ *  - The local demo repository enforces the same access rules in-process.
  * Routes and the AI agent only talk to this interface, so switching to Supabase
  * later needs no changes outside the repo layer.
  */
@@ -18,7 +18,7 @@ export interface Repo {
   createCase(actor: Actor, input: { pathway: Pathway; region: string }): Promise<CaseRow>;
   getCaseBundle(actor: Actor, caseId: string): Promise<CaseBundle>;
   setChecklist(actor: Actor, caseId: string, completed: string[]): Promise<string[]>;
-  addDocument(actor: Actor, input: { caseId: string; kind: DocKind; objectKey: string; originalName: string; mimeType: string; bytes: number }): Promise<void>;
+  addDocument(actor: Actor, input: { caseId: string; kind: DocKind; objectKey: string; originalName: string; mimeType: string; bytes: number }): Promise<boolean>;
   /** Returns the document if the actor may see it; records staff access. */
   openDocument(actor: Actor, documentId: string): Promise<DocRow>;
   staffDirectory(actor: Actor): Promise<DirectoryEntry[]>;

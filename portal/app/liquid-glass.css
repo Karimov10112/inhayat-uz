@@ -1,0 +1,33 @@
+:root{--brand:#086f63;--ink:#132f3c;--muted:#48636b;--line:#cde6e2}
+body{background:radial-gradient(ellipse at 84% 0,#d7f4ee,transparent 44rem),#f1f8fa}
+:where(button,a,input,select,textarea):focus-visible{outline:3px solid #22978a;outline-offset:3px}
+.side,.auth{background:radial-gradient(ellipse at 0 0,#168477,transparent 60%),linear-gradient(146deg,#103d49,#122e41)}
+.side{border-right:1px solid #ffffff28}.side .brand,.side nav button{color:#e4f5f2}
+.side nav button{border-radius:999px;transition:background .25s,transform .25s}
+.side nav button.active{background:linear-gradient(155deg,#edfff6,#beece4);color:#134940;box-shadow:inset 0 1px 0 white,0 6px 15px #09272b40}
+.brand-mark,.primary{background:linear-gradient(145deg,#087e6b,#13505c);box-shadow:inset 0 1px 0 #ffffff4d}
+.card,.kpi,.stat,.auth-card,.table{border:1px solid #c5e2df;border-radius:22px;background:linear-gradient(145deg,#ffffffed,#edf9f8db);box-shadow:0 14px 36px #224e5912,inset 0 1px 0 white}
+.status-bar{border-radius:999px;background:#deeeed;box-shadow:inset 0 2px 4px #123e4622}
+.workload{margin:0 0 18px}
+.workload div{display:flex;justify-content:space-between;gap:12px;margin:12px 0 6px}
+.workload progress{width:100%;accent-color:#0e8b7b;height:14px}
+.workload p{margin:6px 0 0}
+.activity-bell button{display:flex;align-items:center;gap:8px;min-height:42px;border:1px solid #b6d9d0;background:#f0fffa;color:#165c56;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.875rem}
+.activity-bell span:not(:empty){display:block;margin-top:6px;padding:7px 10px;border-radius:12px;background:#d7f6ed;color:#173b40;font-size:.875rem}
+.table-scroll{overflow-x:auto;border-radius:22px}
+.status-detail{display:grid;gap:8px;margin-top:16px}
+.status-detail>div{display:grid;grid-template-columns:minmax(7rem,1fr) minmax(3rem,2fr) 2rem;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.status-detail progress{width:100%;accent-color:#0e8b7b}
+.status-detail strong{text-align:right;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.auth .auth-card{background:linear-gradient(170deg,#ffffff,#f2fbf9);border-color:#ffffff;box-shadow:0 30px 70px -30px #031d2399}
+/* Match each status row to its legend colour */
+.status-detail progress{appearance:none;-webkit-appearance:none;height:10px;border:0;border-radius:99px;background:#e4efed;overflow:hidden;--bar:#0e8b7b}
+.status-detail progress::-webkit-progress-bar{background:#e4efed;border-radius:99px}
+.status-detail progress::-webkit-progress-value{background:var(--bar);border-radius:99px}
+.status-detail progress::-moz-progress-bar{background:var(--bar);border-radius:99px}
+.status-detail .bar-draft{--bar:#9fb3ae}
+.status-detail .bar-documents_pending{--bar:#e8876b}
+.status-detail .bar-under_review{--bar:#e0a92e}
+.status-detail .bar-centre_contacted{--bar:#1d9a8a}
+.status-detail .bar-closed{--bar:#6b6b85}

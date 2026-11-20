@@ -1,4 +1,4 @@
-// Shared domain types used by both data back-ends (demo JSON store and Supabase).
+// Shared domain types used by the local demo backend.
 
 export type CaseStatus = "draft" | "documents_pending" | "under_review" | "centre_contacted" | "closed";
 export const CASE_STATUSES: CaseStatus[] = ["draft", "documents_pending", "under_review", "centre_contacted", "closed"];
